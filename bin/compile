@@ -26,7 +26,7 @@ install_system_deps() {
     local build_tmpdir=$(mktemp -d)
     mkdir -p $build_tmpdir
 
-    SUPPORTED_BROWSERS=${PLAYWRIGHT_BUILDPACK_BROWSERS:-chromium,firefox,webkit}
+    SUPPORTED_BROWSERS=${PLAYWRIGHT_BUILDPACK_BROWSERS:-chromium}
     echo "Installing Playwright dependencies (env: PLAYWRIGHT_BUILDPACK_BROWSERS) for $SUPPORTED_BROWSERS."
 
     if [[ "$SUPPORTED_BROWSERS" == *"chromium"* ]]; then
@@ -43,61 +43,20 @@ libxkbcommon0
 libxrandr2
 libatspi2.0-0
 libxshmfence-dev
+libgstreamer1.0-0
+libatomic1
+libwoff1
+libgstreamer-plugins-base1.0-0
+libgstreamer-gl1.0-0
+libgstreamer-plugins-bad1.0-0
+libenchant-2-2
+libsecret-1-0
+libhyphen0
+libmanette-0.2-0
+libflite1
+libgles2
 EOF
     fi
-
-    if [[ "$SUPPORTED_BROWSERS" == *"firefox"* ]]; then
-        cat << EOF >>$build_tmpdir/Aptfile
-# Firefox dependencies
-libdbus-glib-1-2
-libxt6
-libsm6
-libice6
-libx11-xcb1
-libxcursor1
-libxi6
-EOF
-    fi
-
-    if [[ "$SUPPORTED_BROWSERS" == *"firefox"* || "$SUPPORTED_BROWSERS" == *"chromium"* ]]; then
-        cat << EOF >>$build_tmpdir/Aptfile
-# Needed by Firefox and Chromium
-libgdk-pixbuf2.0-0
-libcairo-gobject2
-libpulse0
-libusb-1.0-0
-libatk1.0-0
-libxcomposite1
-libxdamage1
-libxfixes3
-libgtk-3-0
-EOF
-    fi
-
-    case "$STACK" in
-      "heroku-18")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx5
-EOF
-        ;;
-      "heroku-20")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx6
-EOF
-        ;;
-        "heroku-22")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx7
-EOF
-        ;;
-        "heroku-24")
-        cat << EOF >>$build_tmpdir/Aptfile
-libasound2t64
-EOF
-        ;;
-      *)
-        error "STACK must be 'heroku-18', 'heroku-20', 'heroku-22', or 'heroku-24'"
-    esac
 
     local cache_tmpdir=$(mktemp -d)
 
@@ -126,20 +85,6 @@ EOF
     # Give environment variable to other buildpacks
     echo "export PLAYWRIGHT_BROWSERS_PATH=0" >> "$BP_DIR/export"
     export PLAYWRIGHT_BROWSERS_PATH=0
-}
-
-# See here as a reference: https://devcenter.heroku.com/articles/buildpack-api#bin-compile
-export_env_dir() {
-  env_dir=$1
-  acceptlist_regex=${2:-''}
-  denylist_regex=${3:-'^(PATH|GIT_DIR|CPATH|CPPATH|LD_PRELOAD|LIBRARY_PATH)$'}
-  if [ -d "$env_dir" ]; then
-    for e in $(ls $env_dir); do
-      echo "$e" | grep -E "$acceptlist_regex" | grep -qvE "$denylist_regex" &&
-      export "$e=$(cat $env_dir/$e)"
-      :
-    done
-  fi
 }
 
 export_env_dir "$ENV_DIR" PLAYWRIGHT_BUILDPACK_BROWSERS
