@@ -92,7 +92,7 @@ EOF
         ;;
         "heroku-24")
         cat << EOF >>$build_tmpdir/Aptfile
-libvpx7
+libvpx6
 libasound2t64
 EOF
         ;;
