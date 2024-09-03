@@ -114,17 +114,6 @@ EOF
     rm -rf $buildpack_tmpdir $build_tmpdir $cache_tmpdir
 }
 
-install_nodejs() {
-    topic "Installing Node.js"
-    curl -sL https://deb.nodesource.com/setup_16.x | bash -
-    apt-get install -y nodejs
-}
-
-install_playwright_browsers() {
-    topic "Installing Playwright Browsers"
-    npx playwright install --with-deps
-}
-
 configure_export_env() {
     topic "Writing profile script"
     mkdir -p $BUILD_DIR/.profile.d
@@ -155,6 +144,4 @@ export_env_dir() {
 
 export_env_dir "$ENV_DIR" PLAYWRIGHT_BUILDPACK_BROWSERS
 install_system_deps
-install_nodejs
-install_playwright_browsers
 configure_export_env
