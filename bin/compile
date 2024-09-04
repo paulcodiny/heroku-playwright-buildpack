@@ -44,31 +44,6 @@ libxshmfence-dev
 EOF
     fi
 
-    case "$STACK" in
-      "heroku-18")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx5
-EOF
-        ;;
-      "heroku-20")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx6
-EOF
-        ;;
-        "heroku-22")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx7
-EOF
-        ;;
-        "heroku-24")
-        cat << EOF >>$build_tmpdir/Aptfile
-libvpx7
-EOF
-        ;;
-      *)
-        error "STACK must be 'heroku-18', 'heroku-20', 'heroku-22', or 'heroku-24'"
-    esac
-
     local cache_tmpdir=$(mktemp -d)
 
     HOME=/app $buildpack_tmpdir/bin/compile $build_tmpdir $cache_tmpdir
