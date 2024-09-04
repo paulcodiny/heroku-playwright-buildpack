@@ -5,7 +5,6 @@ set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 ENV_DIR=$3
-BP_DIR=`cd $(dirname $0); cd ..; pwd`
 
 error() {
     echo " !     $*" >&2
@@ -29,12 +28,13 @@ install_system_deps() {
     SUPPORTED_BROWSERS=${PLAYWRIGHT_BUILDPACK_BROWSERS:-chromium}
     echo "Installing minimal Playwright dependencies (env: PLAYWRIGHT_BUILDPACK_BROWSERS) for $SUPPORTED_BROWSERS."
 
-    # Minimal set of dependencies for Chromium to take screenshots
-    cat << EOF >>$build_tmpdir/Aptfile
+    if [[ "$SUPPORTED_BROWSERS" == *"chromium"* ]]; then
+        cat << EOF >>$build_tmpdir/Aptfile
+# Minimal Chromium dependencies
 libnspr4
 libnss3
 libxss1
-libasound2
+fonts-noto-color-emoji
 libgbm1
 libatk-bridge2.0-0
 libxkbcommon0
@@ -42,6 +42,32 @@ libxrandr2
 libatspi2.0-0
 libxshmfence-dev
 EOF
+    fi
+
+    case "$STACK" in
+      "heroku-18")
+        cat << EOF >>$build_tmpdir/Aptfile
+libvpx5
+EOF
+        ;;
+      "heroku-20")
+        cat << EOF >>$build_tmpdir/Aptfile
+libvpx6
+EOF
+        ;;
+        "heroku-22")
+        cat << EOF >>$build_tmpdir/Aptfile
+libvpx7
+EOF
+        ;;
+        "heroku-24")
+        cat << EOF >>$build_tmpdir/Aptfile
+libvpx7
+EOF
+        ;;
+      *)
+        error "STACK must be 'heroku-18', 'heroku-20', 'heroku-22', or 'heroku-24'"
+    esac
 
     local cache_tmpdir=$(mktemp -d)
 
@@ -51,6 +77,7 @@ EOF
         error "Could not install dependencies"
     fi
     mv $build_tmpdir/.apt $BUILD_DIR
+    # mv file in case user is using .profile.d
     mkdir -p $BUILD_DIR/.profile.d/
     mv $build_tmpdir/.profile.d/000_apt.sh $BUILD_DIR/.profile.d/
 
@@ -62,9 +89,11 @@ configure_export_env() {
     mkdir -p $BUILD_DIR/.profile.d
     cat << EOF >$BUILD_DIR/.profile.d/001_playwright.sh
 export PLAYWRIGHT_BROWSERS_PATH=0
+# They are not referenced correctly for ffmpeg
 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/app/.apt/usr/lib/x86_64-linux-gnu/pulseaudio/:/app/.apt/lib/x86_64-linux-gnu/
 EOF
 
+    # Give environment variable to other buildpacks
     echo "export PLAYWRIGHT_BROWSERS_PATH=0" >> "$BP_DIR/export"
     export PLAYWRIGHT_BROWSERS_PATH=0
 }
