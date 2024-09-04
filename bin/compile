@@ -68,8 +68,8 @@ export PLAYWRIGHT_BROWSERS_PATH=0
 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/app/.apt/usr/lib/x86_64-linux-gnu/pulseaudio/:/app/.apt/lib/x86_64-linux-gnu/
 EOF
 
-    # Give environment variable to other buildpacks
-    echo "export PLAYWRIGHT_BROWSERS_PATH=0" >> "$BP_DIR/export"
+    # Instead of using /export, write to a safe location like $BUILD_DIR/.profile.d
+    echo "export PLAYWRIGHT_BROWSERS_PATH=0" >> "$BUILD_DIR/.profile.d/export"
     export PLAYWRIGHT_BROWSERS_PATH=0
 }
 
