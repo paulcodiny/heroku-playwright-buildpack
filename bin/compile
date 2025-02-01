@@ -51,6 +51,12 @@ EOF
         rm -rf $buildpack_tmpdir $build_tmpdir $cache_tmpdir
         error "Could not install dependencies"
     fi
+    echo 'Build dir content'
+    ls $BUILD_DIR
+    echo 'Tmp dir .apt'
+    cat $build_tmpdir/.apt
+    echo 'Build dir .apt'
+    cat $BUILD_DIR/.apt
     mv $build_tmpdir/.apt $BUILD_DIR
     # mv file in case user is using .profile.d
     mkdir -p $BUILD_DIR/.profile.d/
