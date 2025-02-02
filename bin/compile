@@ -46,6 +46,10 @@ libxcomposite1
 libxdamage1
 libxfixes3
 libasound2
+libx11-xcb1
+libxcursor1
+libgtk-3-0
+
 EOF
     fi
 
